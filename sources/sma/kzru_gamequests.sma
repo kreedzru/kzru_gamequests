@@ -20,15 +20,15 @@ new kzru_PlayerQuests[MAX_PLAYERS+1]; // Активные квесты игро�
 public plugin_init() {
     register_plugin(kzru_plname, kzru_authors, kzru_version);
     register_concmd("kzru_reload", "KreedzReloadConfig", ADMIN_CFG, "Reload Configurations Quests");
-    register_clcmd(say "/quests", "KreedzShowQuests");
+    register_clcmd("say /quests", "KreedzShowQuests");
 
-    kzru_QuestName = ArrayCreate(32);
+    kzru_QuestNames = ArrayCreate(32);
     kzru_QuestTypes = ArrayCreate(32);
     kzru_QuestParams = ArrayCreate(64);
     kzru_QuestSettings = TrieCreate();
 
     LoadKreedzQuestsConfig();
-    SQL_Init();
+    //SQL_Init();
 }
 
 public LoadKreedzQuestsConfig() {
@@ -42,21 +42,34 @@ public LoadKreedzQuestsConfig() {
         return;
     }
 
-    new iKreedzLine[256], iKreedzSection[256], iKreedzKey[32], iKreedzValue[128];
+    new iKreedzLine[256], iKreedzSection[32], iKreedzRightPart[128]; // Объявлена переменная iKreedzRightPart
     new KreedzCurrentQuest[32];
+    new iKreedzKey[32], iKreedzValue[128]; // Объявлены переменные для ключа и значения
     while (!feof(iKreedzFile)) {
         fgets(iKreedzFile, iKreedzLine, charsmax(iKreedzLine));
         trim(iKreedzLine);
 
-        // Sections Processing: [Quest_*]
-        if (iKreedzLine[0] == '[') {
-            strtok(iKreedzLine[1], iKreedzSection, charsmax(iKreedzSection), ']');
+        // Обработка секций вида [Quest_*]
+        if (iKreedzLine[0] == '[') 
+        {
+            strtok(
+                iKreedzLine,         // Исходная строка
+                iKreedzSection,      // Левая часть (до ']')
+                charsmax(iKreedzSection), 
+                iKreedzRightPart,    // Правая часть (после ']')
+                charsmax(iKreedzRightPart),
+                ']',                 // Разделитель
+                1                    // Обрезать пробелы
+            );
+            
+            replace(iKreedzSection, charsmax(iKreedzSection), "[", "");
+            
             copy(KreedzCurrentQuest, charsmax(KreedzCurrentQuest), iKreedzSection);
             ArrayPushString(kzru_QuestNames, KreedzCurrentQuest);
             kzru_GameQuests++;
         }
-        // Sections Processing Quest Parameters
-        else if (parse(iKreedzLine, iKreedzKey, charsmax(iKreedzKey), iKreedzValue, charsmax(iKreedzValue))) {
+        else if (parse(iKreedzLine, iKreedzKey, charsmax(iKreedzKey), iKreedzValue, charsmax(iKreedzValue))) 
+        {
             new settingKey[64];
             format(settingKey, charsmax(settingKey), "%s_%s", KreedzCurrentQuest, iKreedzKey);
             TrieSetString(kzru_QuestSettings, settingKey, iKreedzValue);
