@@ -1,0 +1,9 @@
+[ru]
+KZQ_QUEST_START = "Вы начали квест: %s"
+KZQ_QUEST_COMPLETE = "Поздравляем! Вы выполнили квест: %s"
+KZQ_REWARD_RECEIVED = "Вы получили награду: %s"
+
+[en]
+KZQ_QUEST_START = "You started quest: %s"
+KZQ_QUEST_COMPLETE = "Congratulations! You completed quest: %s"
+KZQ_REWARD_RECEIVED = "You received reward: %s"
